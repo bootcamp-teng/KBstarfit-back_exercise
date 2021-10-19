@@ -1,4 +1,4 @@
-package com.starfit.goal.config;
+package com.starfit.exercise.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
