@@ -9,5 +9,5 @@ import com.starfit.exercise.model.ExerciseHistory;
 
 @Repository
 public interface ExerciseRepository extends JpaRepository<ExerciseHistory, Long> {
-	List<ExerciseHistory> findByuserId(String userId);
+	List<ExerciseHistory> findByuserId(int userId);
 }

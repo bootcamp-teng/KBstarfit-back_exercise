@@ -48,7 +48,7 @@ public class ExerciseDomain {
 		return new ResponseEntity<String> (entity+"", HttpStatus.OK);
 	}
 
-	public ResponseEntity<List<ExerciseHistory>> getexerList(String userId) {
+	public ResponseEntity<List<ExerciseHistory>> getexerList(int userId) {
 		List<ExerciseHistory> re = null;
 		try {
 			log.info("Start db select");

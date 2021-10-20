@@ -25,7 +25,7 @@ public class ExerciseService {
 		return exerDomain.updateExer(exer);
 	}
 
-	public ResponseEntity<List<ExerciseHistory>> getExerList(String userId) throws Exception {
+	public ResponseEntity<List<ExerciseHistory>> getExerList(int userId) throws Exception {
 		return exerDomain.getexerList(userId);
 	}
 

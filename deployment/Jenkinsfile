@@ -1,0 +1,148 @@
+def label = "starfit-${UUID.randomUUID().toString()}"
+
+/* -------- functions ---------- */
+def notifySlack(STATUS, COLOR) {
+	slackSend (channel: '#teng', color: COLOR, message: STATUS+" : " +  "${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})")
+}
+
+def notifyMail(STATUS, RECIPIENTS) {
+	emailext body: STATUS+" : " +  "${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})",
+	subject: STATUS + " : " + "${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+	to: RECIPIENTS
+}
+/* ------------------------------ */
+
+def email_recipients="stfantasy3324@gmail.com"
+
+notifySlack("STARTED", "#FFFF00")
+//notifyMail("STARTED", "${email_recipients}")
+
+podTemplate(
+	label: label, 
+	containers: [
+		//container image는 docker search 명령 이용
+		containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
+		containerTemplate(name: "docker", image: "docker:latest", ttyEnabled: true, command: "cat"),
+		containerTemplate(name: "kubectl", image: "lachlanevenson/k8s-kubectl", command: "cat", ttyEnabled: true),
+		containerTemplate(name: "scanner", image: "newtmitch/sonar-scanner", ttyEnabled: true, command: "cat")
+	],
+	//volume mount
+	volumes: [
+		hostPathVolume(hostPath: "/var/run/docker.sock", mountPath: "/var/run/docker.sock"),
+		// for normal server.
+		//hostPathVolume(hostPath: "/maven/.m2", mountPath: "/root/.m2")
+		// for kubernetes.
+		nfsVolume(mountPath: "/root/.m2", serverAddress: '169.56.174.133', serverPath: '/data/srv/nfs/.m2', readOnly: false)
+	]
+) 
+{
+	node(label) {
+	
+		// Git clone from Source Repository.
+		stage("Get Source") {
+			git url:"https://github.com/bootcamp-teng/KBstarfit-back_exercise.git", branch: "main", credentialsId: "git_credential"
+			// Javascript based on Node.js
+	 		//git branch: 'main', url: 'https://github.com/happykube/hellonode.git'
+			// Java based on Spring Boot, branch : msa
+			//git branch: 'msa', url: 'https://gitlab.com/jenkins28/sample-service.git'
+		} 
+
+		//-- 환경변수 파일 읽어서 변수값 셋팅 
+		String stageName = ""
+            
+		def props = readProperties  file:"deployment/pipeline.properties"
+		
+		// Docker Hub Info.
+		def tag = props["version"]
+		def dockerRegistry = props["dockerRegistry"]
+		def credential_registry=props["credential_registry"]
+		def image = props["image"]
+
+		// Base Directory
+		def baseDir = props["baseDir"]
+		def baseDeployDir = props["baseDeployDir"]
+        
+		// Kubernetes
+		def deployment = props["deployment"]
+		def config = props["config"]
+		def service = props["service"]
+		def ingress = props["ingress"]
+		def selector_key = props["selector_key"]
+		def selector_val = props["selector_val"]
+		def namespace = props["namespace"] 
+
+		try {
+
+       			stageName = "Build maven project"
+
+			// Build Source from Repository in gitlab
+			stage(stageName) {
+				echo "**** START : " + stageName
+				def _dir = pwd();
+				echo "path : ${_dir}"
+				echo "baseDir : ${baseDir}"
+				echo "baseDeployDir : ${baseDeployDir}"
+				sh "ls -al"
+				container('maven') {
+						sh "mvn -B -f ${baseDir} clean package"
+						echo "*** RESULT ***"
+						sh "pwd"
+						sh "ls -al ${baseDir}/target"
+				}
+			}
+
+			// Code Inspection
+			stage("Inspection Code") {
+				// container("scanner") {
+				// 	sh "sonar-scanner \
+				// 		-Dsonar.projectName=hellonode \
+				// 		-Dsonar.projectKey=hellonode \
+				// 		-Dsonar.sources=. \
+				// 		-Dsonar.inclusions=** \
+				// 		-Dsonar.language=javascript \
+				// 		-Dsonar.host.url=http://sonar.169.56.84.37.nip.io \
+				// 		-Dsonar.login=d08b8bde762cfc3ac15dba8aaaa2aa5e030752ad" 
+				// }
+			} 
+			        
+			// Build Docker, Push Image to Docker Hub Repository.        
+			stage("Build Microservice image") {
+				container("docker") {
+					docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
+						sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
+						sh "docker push ${image}:${tag}"
+						sh "docker tag ${image}:${tag} ${image}:dev"
+						sh "docker push ${image}:dev"
+					}
+				}
+			}
+			
+			// Delete Deployment from Cluster in Kubernetes
+			stage( "Clean Up Existing Deployments" ) {
+				container("kubectl") {
+					sh "kubectl delete deployments -n ${namespace} --selector=${selector_key}=${selector_val}"
+				}
+			}
+
+			// Deploy App to Cluster in Kubernetes
+			stage( "Deploy to Cluster" ) {
+				container("kubectl") {
+					sh "kubectl apply -n ${namespace} -f ${config}"
+					sh "kubectl apply -n ${namespace} -f ${deployment}"
+					sh "sleep 5"
+					sh "kubectl apply -n ${namespace} -f ${service}"
+					sh "kubectl apply -n ${namespace} -f ${ingress}"
+				}
+			}
+
+			// Notify to Solutions : slack, email, sms
+			notifySlack("${currentBuild.currentResult}", "#00FF00")
+			//notifyMail("${currentBuild.currentResult}", "${email_recipients}")
+		} catch(e) {
+			currentBuild.result = "FAILED"
+			notifySlack("${currentBuild.currentResult}", "#FF0000")
+			//notifyMail("${currentBuild.currentResult}", "${email_recipients}")
+		}
+	}
+}
+

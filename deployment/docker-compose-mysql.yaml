@@ -1,0 +1,25 @@
+version: '2'
+
+networks:
+  database:
+
+services:
+  mysql8:
+    container_name: mysql8
+    image: mysql:latest
+    restart: always
+    networks:
+     - database
+    ports:
+     - 3306:31084
+    volumes:
+     - ./mysql/data:/var/lib/mysql
+     - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    environment:
+     - MYSQL_ROOT_PASSWORD=passw0rd
+     - MYSQL_USER=root
+     - MYSQL_PASSWORD=passw0rd
+     - MYSQL_DATABASE=exercise
+     - TZ=Asia/Seoul
+    user: 1000:100
+

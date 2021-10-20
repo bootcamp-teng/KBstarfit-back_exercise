@@ -1,0 +1,51 @@
+server:
+  port: ${service_port:8080}
+
+spring:  
+  application:
+    name: demo-api
+
+  profiles:
+    active: ${profile:default}
+    include: common
+    
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://${db_host:defaulthost}:${db_port:defaultport}/${db_name:exercise}?useUnicode=true&characterEncoding=utf-8
+    username: ${db_user:root}
+    password: ${db_pw:password}
+    sql-script-encoding: utf-8
+    hikari:
+      connection-timeout: 5000
+      validation-timeout: 1000
+      maximum-pool-size: 30
+      minimum-idle: 2
+      connection-test-query: SELECT 1
+
+  h2: 
+    console: 
+      path: /h2console 
+      enabled: true 
+  jpa: 
+    hibernate: 
+      ddl-auto: update 
+    show-sql: true 
+    properties: 
+      hibernate: 
+        format_sql: true
+    
+#logging
+logging:
+   config:
+   pattern:
+      console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([${springAppName:-},%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-Span-Export:-}]){yellow} %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}" 
+   level: 
+      org.springframework: warn
+      com.springboot.microservices.sample: debug
+  
+mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    configuration:
+        map-underscore-to-camel-case: true
+    type-aliases-package: com.demo.microservices.model
+

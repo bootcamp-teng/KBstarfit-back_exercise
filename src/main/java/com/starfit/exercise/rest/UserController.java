@@ -25,10 +25,10 @@ public class UserController {
 	@Autowired
 	private ExerciseService exerService;
 	
-	@GetMapping("/v1/exercise/{userId}")
+	@GetMapping("/v1/exerciselist/{userId}")
 	@ApiOperation(value="운동 리스트 조회하기")
 	public ResponseEntity <List<ExerciseHistory>> getExerList(
-				@PathVariable(name="userId", required = true) String userId
+				@PathVariable(name="userId", required = true) int userId
 			) throws Exception {
 		return exerService.getExerList(userId);
 	}
