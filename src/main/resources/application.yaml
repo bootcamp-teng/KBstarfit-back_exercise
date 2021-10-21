@@ -1,7 +1,7 @@
 server:
   port: ${service_port:8080}
   servlet:
-    context-path: ${SERVLET_CONTEXT_PATH:/exercise} 
+    context-path: ${SERVLET_CONTEXT_PATH:/starfitexercise} 
 spring:  
   application:
     name: demo-api

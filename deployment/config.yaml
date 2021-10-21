@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: exercise-config
 data:
-  SERVLET_CONTEXT_PATH: "/exercise"
+  SERVLET_CONTEXT_PATH: "/starfitexercise"
 # MYSQL DB
   DB_SERVER: mysql.teng
   DB_PORT: "3306"
