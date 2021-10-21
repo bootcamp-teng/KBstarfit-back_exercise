@@ -6,7 +6,7 @@ data:
   SERVLET_CONTEXT_PATH: /starfitexercise
   SERVICE_PORT: "8080"
 # MYSQL DB
-  DB_HOST: mysql
+  DB_HOST: mysql.teng
   DB_PORT: "3306"
   DB_SERVER: mysql.teng
   DB_NAME: exercise
