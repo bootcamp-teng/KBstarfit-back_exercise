@@ -26,6 +26,13 @@ spec:
             name: user
             port:
               number: 8080
+      - path: /starfitgoal
+        pathType: Prefix
+        backend:
+          service:
+            name: goal
+            port:
+              number: 8080
       - path: / 
         pathType: Prefix
         backend:
