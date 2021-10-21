@@ -9,7 +9,7 @@ data:
   DB_HOST: mysql
   DB_PORT: "3306"
   DB_SERVER: mysql.teng
-  DB_NAME: point
+  DB_NAME: exercise
   DB_USERNAME: root
   DB_PASSWORD: passw0rd
   
