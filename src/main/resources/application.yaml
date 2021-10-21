@@ -1,7 +1,7 @@
 server:
-  port: ${SERVICE_PORT:8081}
+  port: ${service_port:8080}
   servlet:
-    context-path: ${SERVLET_CONTEXT_PATH:/}  
+    context-path: ${SERVLET_CONTEXT_PATH:/starfitexercise}  
 
 spring:  
   application:
@@ -13,9 +13,10 @@ spring:
     
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:169.56.174.138}:${DB_PORT:31084}/${DB_NAME:exercise}?useUnicode=true&characterEncoding=utf-8
-    username: ${DB_USER:root}
-    password: ${DB_PASSWORD:passw0rd}
+#    url: jdbc:mysql://${db_host:169.56.174.138}:${db_port:31084}/${db_name:exercise}?useUnicode=true&characterEncoding=utf-8 # 로컬용
+    url: jdbc:mysql://${db_host:mysql}:${db_port:3306}/${db_name:exercise}?useUnicode=true&characterEncoding=utf-8 # 베포용
+    username: ${db_user:root}
+    password: ${db_pw:passw0rd}
     sql-script-encoding: utf-8
     hikari:
       connection-timeout: 5000
