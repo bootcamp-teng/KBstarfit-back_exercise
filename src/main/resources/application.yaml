@@ -1,7 +1,8 @@
 server:
-  port: ${service_port:8080}
+  port: ${SERVICE_PORT:8081}
   servlet:
-    context-path: ${SERVLET_CONTEXT_PATH:/starfitexercise} 
+    context-path: ${SERVLET_CONTEXT_PATH:/}  
+
 spring:  
   application:
     name: demo-api
@@ -12,9 +13,9 @@ spring:
     
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://${db_host:mysql}:${db_port:3306}/${db_name:exercise}?useUnicode=true&characterEncoding=utf-8
-    username: ${db_user:root}
-    password: ${db_pw:passw0rd}
+    url: jdbc:mysql://${DB_HOST:169.56.174.138}:${DB_PORT:31084}/${DB_NAME:exercise}?useUnicode=true&characterEncoding=utf-8
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:passw0rd}
     sql-script-encoding: utf-8
     hikari:
       connection-timeout: 5000
@@ -43,10 +44,14 @@ logging:
    level: 
       org.springframework: warn
       com.springboot.microservices.sample: debug
+      org:
+        hibernate:
+          type:
+            descriptor:
+              sql: trace
   
 mybatis:
     mapper-locations: classpath:mapper/*.xml
     configuration:
         map-underscore-to-camel-case: true
     type-aliases-package: com.demo.microservices.model
-
