@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: starfit
+  name: exercise
   labels:
-    app: starfit
+    app: exercise
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: starfit
+      app: exercise
   template:
     metadata:
       labels:
-        app: starfit
+        app: exercise
     spec:
       containers:
       - name: starfit
-        image: stfantasy3324/starfit:dev
+        image: hjsky1010/exercise:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -24,25 +24,25 @@ spec:
         - name: DB_SERVER
           valueFrom:
             configMapKeyRef:
-              name: sample-config
+              name: starfit-config
               key: DB_SERVER
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: sample-config
+              name: starfit-config
               key: DB_PORT
         - name: DB_USERNAME
           valueFrom:
             configMapKeyRef:
-              name: sample-config
+              name: starfit-config
               key: DB_USERNAME
         - name: DB_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: sample-config
+              name: starfit-config
               key: DB_PASSWORD
         - name: SERVLET_CONTEXT_PATH
           valueFrom:
             configMapKeyRef:
-              name: sample-config
+              name: starfit-config
               key: SERVLET_CONTEXT_PATH

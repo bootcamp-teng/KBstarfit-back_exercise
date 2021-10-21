@@ -5,7 +5,7 @@ metadata:
 data:
   SERVLET_CONTEXT_PATH: "/teng"
 # MYSQL DB
-  DB_SERVER: mysql.mysql
+  DB_SERVER: mysql.teng
   DB_PORT: "3306"
   DB_USERNAME: root
   DB_PASSWORD: passw0rd

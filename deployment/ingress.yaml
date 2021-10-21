@@ -12,11 +12,11 @@ spec:
   - host: teng.169.56.174.139.nip.io
     http:
       paths:
-      - path: /teng
+      - path: /exercise
         pathType: Prefix
         backend:
           service:
-            name: starfit
+            name: exercise
             port:
               number: 8080
       - path: /user
