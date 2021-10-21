@@ -1,6 +1,7 @@
 server:
   port: ${service_port:8080}
-
+  servlet:
+    context-path: ${SERVLET_CONTEXT_PATH:/teng} 
 spring:  
   application:
     name: demo-api
@@ -11,9 +12,9 @@ spring:
     
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://${db_host:defaulthost}:${db_port:defaultport}/${db_name:exercise}?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://${db_host:mysql}:${db_port:3306}/${db_name:exercise}?useUnicode=true&characterEncoding=utf-8
     username: ${db_user:root}
-    password: ${db_pw:password}
+    password: ${db_pw:passw0rd}
     sql-script-encoding: utf-8
     hikari:
       connection-timeout: 5000

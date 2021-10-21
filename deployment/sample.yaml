@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sample
+  name: starfit
   labels:
-    app: sample
+    app: starfit
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sample
+      app: starfit
   template:
     metadata:
       labels:
-        app: sample
+        app: starfit
     spec:
       containers:
-      - name: sample
-        image: stfantasy3324/starfitexercise:dev
+      - name: starfit
+        image: stfantasy3324/starfit:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
