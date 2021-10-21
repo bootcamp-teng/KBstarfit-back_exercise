@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: starfit-config
+  name: exercise-config
 data:
-  SERVLET_CONTEXT_PATH: "/teng"
+  SERVLET_CONTEXT_PATH: "/exercise"
 # MYSQL DB
   DB_SERVER: mysql.teng
   DB_PORT: "3306"

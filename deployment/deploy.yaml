@@ -24,25 +24,25 @@ spec:
         - name: DB_SERVER
           valueFrom:
             configMapKeyRef:
-              name: starfit-config
+              name: exercise-config
               key: DB_SERVER
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: starfit-config
+              name: exercise-config
               key: DB_PORT
         - name: DB_USERNAME
           valueFrom:
             configMapKeyRef:
-              name: starfit-config
+              name: exercise-config
               key: DB_USERNAME
         - name: DB_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: starfit-config
+              name: exercise-config
               key: DB_PASSWORD
         - name: SERVLET_CONTEXT_PATH
           valueFrom:
             configMapKeyRef:
-              name: starfit-config
+              name: exercise-config
               key: SERVLET_CONTEXT_PATH

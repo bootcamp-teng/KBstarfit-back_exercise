@@ -1,7 +1,7 @@
 server:
   port: ${service_port:8080}
   servlet:
-    context-path: ${SERVLET_CONTEXT_PATH:/teng} 
+    context-path: ${SERVLET_CONTEXT_PATH:/exercise} 
 spring:  
   application:
     name: demo-api
