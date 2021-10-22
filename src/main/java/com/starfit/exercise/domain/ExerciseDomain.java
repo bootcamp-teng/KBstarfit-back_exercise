@@ -34,11 +34,11 @@ public class ExerciseDomain {
 		Optional<ExerciseHistory> entity = exerciseRepo.findById(exer.getId());
 		
 		if(entity.isPresent()) {
-			entity.get().setAmount(exer.getAmount());
+			entity.get().setExerAmt(exer.getExerAmt());
 			entity.get().setDate(exer.getDate());
 			entity.get().setTotal(exer.getTotal());
-			entity.get().setUsergoalId(exer.getUsergoalId());
-			entity.get().setUserId(exer.getUsergoalId());
+			entity.get().setUserGoalId(exer.getUserGoalId());
+			entity.get().setUserId(exer.getUserId());
 			ExerciseHistory re  = exerciseRepo.save(exer);
 		}
 
