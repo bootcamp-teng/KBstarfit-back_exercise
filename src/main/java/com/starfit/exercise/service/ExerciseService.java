@@ -26,7 +26,7 @@ public class ExerciseService {
 	}
 
 	public ResponseEntity<List<ExerciseHistory>> getExerList(int userId) throws Exception {
-		return exerDomain.getexerList(userId);
+		return exerDomain.getExerList(userId);
 	}
 
 	public ResponseEntity<Optional<ExerciseHistory>> getExer(Long Id) throws Exception {
