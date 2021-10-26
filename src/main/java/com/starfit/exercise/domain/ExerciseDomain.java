@@ -39,6 +39,8 @@ public class ExerciseDomain {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	//private static RestTemplate restTemplate = getRestTemplate();
 	
+	private final String baseUrl = "http://teng.169.56.174.139.nip.io";
+		
 	@Autowired
 	private ExerciseRepository exerciseRepo;
 	
@@ -46,16 +48,15 @@ public class ExerciseDomain {
 	
 	public ResponseEntity<String> insertExer(ExerciseHistory exercise) throws Exception {
 		// TODO : resttemplate 함수로 빼기
-		
+		// "http://teng.169.56.174.139.nip.io/starfitgoal/v1/usergoalsbyid/"
 		log.info("Start insertExer");
-		ResponseEntity<String> userGoal = getRestTemplate().exchange(
-			            "http://teng.169.56.174.139.nip.io/starfitgoal/v1/usergoalsbyid/"+exercise.getUserId(),
-			            HttpMethod.GET,
-			            null,
-			            String.class);
+		
+		ResponseEntity<String> userGoal = doRestTemplate(new JSONObject(), "/starfitgoal/v1/usergoalsbyid/"+exercise.getUserId(), HttpMethod.GET) ;
+		if (userGoal.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CREATED, "데이터를 가져오지 못했습니다.");
 		
 		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String,Object>>();
-		list = objectMapper.readValue(userGoal.getBody(),ArrayList.class);
+		
+		list = objectMapper.readValue(userGoal.getBody(), ArrayList.class);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 		int userGoalId = 0;
@@ -63,6 +64,9 @@ public class ExerciseDomain {
 		int dayExerAmt=0;
 		String endDateString = null;
 		//LocalDateTime endDate=null;
+		log.info("findgoal");
+		HashMap userGoalMap = null;
+		JSONObject updateUserGoalJson = null;
 		for(HashMap userGoalJson:list){
 			if ("0".equals(userGoalJson.get("statusCode"))) {
 				period = (int) userGoalJson.get("period");
@@ -74,11 +78,13 @@ public class ExerciseDomain {
 				endDateString = userGoalJson.get("endDate").toString().split("T")[0];
 				//endDate = (LocalDateTime) userGoalJson.get("endDate");
 				//System.out.println(endDate);
+				userGoalMap = (HashMap) userGoalJson.clone();
+				updateUserGoalJson =  new JSONObject(userGoalMap);
 				break;
 			} 
 		}
 		
-		if(endDateString==null) return new ResponseEntity<String> ("진행중인 목표가 있습니다", HttpStatus.CONTINUE);
+		if(endDateString==null) return new ResponseEntity<String> ("진행중인 목표가 없습니다", HttpStatus.CREATED);
 
 
 		exercise.setUserGoalId(userGoalId);
@@ -90,32 +96,21 @@ public class ExerciseDomain {
 		LocalDateTime date = LocalDateTime.now(); 
 		String currDateString = date.format(formatter);
 		//String maxDateString = maxDateExerHist.getDate().format(formatter);
-		String maxDateString = Optional.ofNullable(maxDateExerHist.getDate().format(formatter)).orElse("");
+		String maxDateString = maxDateExerHist==null? "" : maxDateExerHist.getDate().format(formatter);
 		//String endDateString = endDate.format(formatter);
 		
 		Date curr = sdf.parse(currDateString);
 		Date end = sdf.parse(endDateString);
 		
 	    if(curr.after(end)){
-	    	HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.APPLICATION_JSON);
-
-	    	JSONObject updateJsonObject = new JSONObject();
-	        updateJsonObject.put("userGoalId", userGoalId);
-	        updateJsonObject.put("statusCode", "1");
-	        
-	    	HttpEntity<String> request = new HttpEntity<String>(updateJsonObject.toString(), headers);
-	    	
-			ResponseEntity<String> updateResult = getRestTemplate().exchange(
-		            "http://teng.169.56.174.139.nip.io/starfitgoal/v1/usergoal",
-		            HttpMethod.PUT,
-		            request,
-		            String.class);
-			if (updateResult.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CONTINUE, "업데이트 실패");
-			
-			log.info("업데이트 결과 : {}",updateResult.getStatusCode().toString());
-			
-	    	return new ResponseEntity<String> ("끝난 목표입니다. 새로운 목표를 등록해주세요.", HttpStatus.CONTINUE);
+	    	updateUserGoalJson.put("statusCode", "1");
+//	    	JSONObject updateJsonObject = new JSONObject();
+//	        updateJsonObject.put("userGoalId", userGoalId);
+//	        updateJsonObject.put("statusCode", "1");
+	        	    	
+			ResponseEntity<String> updateResult = doRestTemplate(updateUserGoalJson, "/starfitgoal/v1/usergoal", HttpMethod.PUT);
+			if (updateResult.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CREATED, "목표를 종료시키지 못했습니다.");
+			return new ResponseEntity<String> ("이미 종료된 목표입니다. 새로운 목표를 등록하세요", HttpStatus.OK);
 	    }
 
 		int prevExer = 0;
@@ -124,23 +119,18 @@ public class ExerciseDomain {
 			prevExer = maxDateExerHist.getExerAmt();
 		}
 		
+		boolean pointFlg = false;
 		
 		if (prevExer < dayExerAmt && exercise.getExerAmt() >= dayExerAmt) {
-			HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.APPLICATION_JSON);
-	        JSONObject insertJsonObject = new JSONObject();
-	        insertJsonObject.put("userId", exercise.getUserId());
-	        // TODO : stdPoint 가져오기
-	        int stdPoint = 10;
-	        insertJsonObject.put("point", stdPoint);
-	        insertJsonObject.put("description", "일일 목표 달성");
-	        HttpEntity<String> request = new HttpEntity<String>(insertJsonObject.toString(), headers);
-	        ResponseEntity<String> updateResult = getRestTemplate().exchange(
-		            "http://teng.169.56.174.139.nip.io/starfitpoint/v1/point",
-		            HttpMethod.POST,
-		            request,
-		            String.class);
-			if (updateResult.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CONTINUE, "업데이트 실패");		
+			JSONObject insertJsonObject = new JSONObject();
+			insertJsonObject.put("userId", exercise.getUserId());
+			ResponseEntity<String> stdPointEntity = doRestTemplate(new JSONObject(), "/starfitgoal/v1/goal/"+updateUserGoalJson.get("goalId"), HttpMethod.GET);
+			int stdPoint = (int) (objectMapper.readValue(stdPointEntity.getBody(), JSONObject.class).get("stdPoint"));
+			insertJsonObject.put("point", stdPoint);
+			insertJsonObject.put("description", "일일 목표 달성");
+			ResponseEntity<String> result = doRestTemplate(insertJsonObject, "/starfitpoint/v1/point", HttpMethod.POST);	
+			if (result.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CREATED, "일일 포인트를 적립하지 못했습니다.");
+			pointFlg = true;
 			
 		}
 		
@@ -155,48 +145,49 @@ public class ExerciseDomain {
 			exerAmtTotal += exerHist.getExerAmt();
 		}
 		
+		boolean goalFlg = false;
+		
 		if(exerAmtTotal >= period*dayExerAmt) {
-	    	HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.APPLICATION_JSON);
-	        JSONObject updateJsonObject = new JSONObject();
-	        System.out.println(userGoalId);
-	        updateJsonObject.put("id", userGoalId);
-	        updateJsonObject.put("statusCode", "1");
-	    	HttpEntity<String> request = new HttpEntity<String>(updateJsonObject.toString(), headers);
-			ResponseEntity<String> updateResult = getRestTemplate().exchange(
-		            "http://teng.169.56.174.139.nip.io/starfitgoal/v1/usergoal",
-		            HttpMethod.PUT,
-		            request,
-		            String.class);
-			if (updateResult.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CONTINUE, "업데이트 실패");			
-//			{
-//				  "date": "2021-10-25T07:11:19.891Z",
-//				  "description": "string",
-//				  "id": 0,
-//				  "point": 0,
-//				  "userId": 0
-//				}
-//			
-			// 포인트 업데이트
-	    	headers = new HttpHeaders();
-	        headers.setContentType(MediaType.APPLICATION_JSON);
+			updateUserGoalJson.put("statusCode", "1");
+//	        JSONObject updateJsonObject = new JSONObject();
+//	        System.out.println(userGoalId);
+//	        updateJsonObject.put("id", userGoalId);
+//	        updateJsonObject.put("statusCode", "1");
+			ResponseEntity<String> updateResult = doRestTemplate(updateUserGoalJson, "/starfitgoal/v1/usergoal", HttpMethod.PUT);
+
 	        JSONObject insertJsonObject = new JSONObject();
 	        insertJsonObject.put("userId", exercise.getUserId());
-	        // TODO : stdPoint 가져오기
-	        int stdPoint = 10;
+			ResponseEntity<String> stdPointEntity = doRestTemplate(new JSONObject(), "/starfitgoal/v1/goal/"+updateUserGoalJson.get("goalId"), HttpMethod.GET);
+			int stdPoint = (int) (objectMapper.readValue(stdPointEntity.getBody(), JSONObject.class).get("stdPoint"));
 	        insertJsonObject.put("point", stdPoint*period);
 	        insertJsonObject.put("description", "목표 달성 완료");
-	    	request = new HttpEntity<String>(insertJsonObject.toString(), headers);
-			updateResult = getRestTemplate().exchange(
-		            "http://teng.169.56.174.139.nip.io/starfitpoint/v1/point",
-		            HttpMethod.POST,
-		            request,
-		            String.class);
-			if (updateResult.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CONTINUE, "업데이트 실패");			
+			updateResult = doRestTemplate(insertJsonObject, "/starfitpoint/v1/point", HttpMethod.POST); 
+			
+			if (updateResult.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CONTINUE, "목표 달성에 따른 스타포인트를 지급하지 못했습니다.");
+			goalFlg = true;
 		}
-		
-		
-		return new ResponseEntity<String> (re+"", HttpStatus.OK);
+		String msg = "";
+		if (goalFlg) msg = "최종목표를 달성하셨습니다";
+		else if (pointFlg) msg = "일일 포인트 지급이 완료되었습니다";
+		else msg = "운동량이 기록되었습니다.";
+			
+		return new ResponseEntity<String> (msg, HttpStatus.OK);
+	}
+	
+
+	private ResponseEntity<String> doRestTemplate(JSONObject jsonObject, String url, HttpMethod method) {
+		log.info("jsonObject : {}" ,jsonObject.toString());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> request = new HttpEntity<String>(jsonObject.toString(), headers);
+		ResponseEntity<String> result = getRestTemplate().exchange(
+		        baseUrl + url,
+		        method,
+		        request,
+		        String.class);
+		//if (result.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CONTINUE, "에러");
+		log.info("result : {}", result.toString());
+		return result;
 	}
 
 	public ResponseEntity<String> updateExer(ExerciseHistory exer) throws Exception {
