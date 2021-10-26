@@ -38,6 +38,10 @@ public class ExerciseService {
 		return exerDomain.getRank(userId);
 	}
 	
+	public ResponseEntity<List<ExerciseHistory>> getListByUserGoalId(int usergoalid) throws Exception{
+		return exerDomain.getListByUserGoalId(usergoalid);
+	}
+	
 //	public ResponseEntity <String > createTestGoals(int startGoalId, int goalCount) throws Exception { 
 //		return goalDomain.createTestGoals(startGoalId, goalCount);
 //	}

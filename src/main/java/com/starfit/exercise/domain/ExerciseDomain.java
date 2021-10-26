@@ -232,6 +232,17 @@ public class ExerciseDomain {
 		}
 		return new ResponseEntity<Optional<ExerciseHistory>> (re, HttpStatus.OK);
 	}
+	
+	public ResponseEntity<List<ExerciseHistory>> getListByUserGoalId(int usergoalid) throws Exception{
+		List<ExerciseHistory> exerlist = null;
+		try {
+			log.info("Start db select");
+			exerlist = exerciseRepo.findByUserGoalId(usergoalid);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<List<ExerciseHistory>> (exerlist, HttpStatus.OK);
+	}
 	@Bean
 	public RestTemplate getRestTemplate(){
 	    return new RestTemplate();
