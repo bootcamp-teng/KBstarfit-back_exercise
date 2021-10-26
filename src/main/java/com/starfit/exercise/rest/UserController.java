@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.starfit.exercise.model.AllRankList;
 import com.starfit.exercise.model.ExerciseHistory;
 import com.starfit.exercise.service.ExerciseService;
 
@@ -65,4 +65,13 @@ public class UserController {
 //		
 //		return userService.createTestUsers(startUserId, userCount);
 //	}	
+	
+	@GetMapping("/v1/rank/{userId}")
+	@ApiOperation(value = "랭킹 조회(+userId 등수)")
+	public ResponseEntity <Optional<AllRankList>> getRank(
+			@PathVariable(name="userId", required = true) int userId
+		) throws Exception {
+	return exerService.getRank(userId);
+	}	
+	
 }

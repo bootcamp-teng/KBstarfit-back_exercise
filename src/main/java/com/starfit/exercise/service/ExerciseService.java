@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.starfit.exercise.domain.ExerciseDomain;
+import com.starfit.exercise.model.AllRankList;
 import com.starfit.exercise.model.ExerciseHistory;
 
 @Service
@@ -31,6 +32,10 @@ public class ExerciseService {
 
 	public ResponseEntity<Optional<ExerciseHistory>> getExer(Long Id) throws Exception {
 		return exerDomain.getExer(Id);
+	}
+
+	public ResponseEntity<Optional<AllRankList>> getRank(int userId) throws Exception {
+		return exerDomain.getRank(userId);
 	}
 	
 //	public ResponseEntity <String > createTestGoals(int startGoalId, int goalCount) throws Exception { 

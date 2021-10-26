@@ -1,6 +1,5 @@
 package com.starfit.exercise.domain;
 
-import static org.junit.Assert.assertNotNull;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -10,13 +9,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,10 +26,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starfit.exercise.data.ExerciseRepository;
+import com.starfit.exercise.model.AllRankList;
 import com.starfit.exercise.model.ExerciseHistory;
+import com.starfit.exercise.model.Rank;
 
 
 @Service
@@ -235,5 +235,41 @@ public class ExerciseDomain {
 	@Bean
 	public RestTemplate getRestTemplate(){
 	    return new RestTemplate();
+	}
+
+
+	public ResponseEntity<Optional<AllRankList>> getRank(int userId) throws Exception{
+		ResponseEntity<String> result = doRestTemplate(new JSONObject(), "/starfituser/v1/user/all", HttpMethod.GET);
+		if (result.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CREATED, "사용자목록을 가져오지 못했습니다");
+		ArrayList<HashMap<String,Object>> list = objectMapper.readValue(result.getBody(), ArrayList.class);
+		LocalDateTime date = LocalDateTime.now();
+		date.minusDays(1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		String yesterday = date.format(formatter);
+
+		List<ExerciseHistory> rankExer = exerciseRepo.selectYesterRank(yesterday);
+		if (rankExer.isEmpty()) return new ResponseEntity<Optional<AllRankList>> (Optional.ofNullable(new AllRankList()), HttpStatus.OK);
+		AllRankList allRankList = new AllRankList();
+		List<Rank> rankList = new ArrayList<>(); 
+		int rank = 1;
+		for(ExerciseHistory exer : rankExer) {
+			Rank currRank = new Rank();
+			log.info(list.toString());
+			List<HashMap<String,Object>> username
+				= list.stream()
+					.filter(t->(int) t.get("id")==exer.getUserId())
+					.collect(Collectors.toList());
+			if (!username.isEmpty()) currRank.setName((String) username.get(0).get("name"));
+			currRank.setExerHist(exer);
+			if (userId==exer.getUserId()) {
+				allRankList.setMyRank(rank);
+				allRankList.setMyExerAmt(exer.getExerAmt());
+			}
+			rankList.add(currRank);
+			currRank.setRank(rank++);
+		}
+		allRankList.setRankList(rankList);
+		
+		return new ResponseEntity<Optional<AllRankList>> (Optional.ofNullable(allRankList), HttpStatus.OK);
 	}
 }
