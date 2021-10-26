@@ -56,6 +56,13 @@ public class UserController {
 			) throws Exception{
 		return exerService.updateExer(exer);
 	}
+	@GetMapping("/v1/exercisebygoal/{UserGoalId}")
+	@ApiOperation(value = "운동 히스토리 조회")
+	public ResponseEntity <List<ExerciseHistory>> getExerListByGoal(
+			@PathVariable(name="UserGoalId", required = true) int UserGoalId
+			) throws Exception{
+		return exerService.getListByUserGoalId(UserGoalId);
+	}
 //	@GetMapping("/createtestusers/{startUserId}/{userCount}")
 //	@ApiOperation(value="테스트 사용자를 userCount명 등록하기 ")
 //	public ResponseEntity <String > createTestUsers(
