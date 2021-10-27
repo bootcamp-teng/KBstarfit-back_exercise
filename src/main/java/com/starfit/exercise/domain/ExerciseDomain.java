@@ -254,7 +254,7 @@ public class ExerciseDomain {
 		if (result.getStatusCode().isError()) throw new ResponseStatusException(HttpStatus.CREATED, "사용자목록을 가져오지 못했습니다");
 		ArrayList<HashMap<String,Object>> list = objectMapper.readValue(result.getBody(), ArrayList.class);
 		LocalDateTime date = LocalDateTime.now();
-		date.minusDays(1);
+		date = date.minusDays(1);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		String yesterday = date.format(formatter);
 
@@ -265,16 +265,16 @@ public class ExerciseDomain {
 		int rank = 1;
 		for(ExerciseHistory exer : rankExer) {
 			Rank currRank = new Rank();
-			log.info(list.toString());
 			List<HashMap<String,Object>> username
 				= list.stream()
-					.filter(t->(int) t.get("id")==exer.getUserId())
+					.filter(t->(int) t.get("id")==exer.getUserId()) // 유저테이블 -> 유저 아이디 -> 유저 이름 불러옴
 					.collect(Collectors.toList());
 			if (!username.isEmpty()) currRank.setName((String) username.get(0).get("name"));
 			currRank.setExerHist(exer);
 			if (userId==exer.getUserId()) {
 				allRankList.setMyRank(rank);
 				allRankList.setMyExerAmt(exer.getExerAmt());
+				allRankList.setMyName((String) username.get(0).get("name"));
 			}
 			rankList.add(currRank);
 			currRank.setRank(rank++);

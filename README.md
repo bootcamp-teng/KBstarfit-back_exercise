@@ -1,1 +1,3 @@
-# KBstarfit-back_exercise
+# KBstarfit-back_exercise  
+
+주소 : baseUrl + /starfitexercise

@@ -10,4 +10,5 @@ public class AllRankList {
 	private List<Rank> rankList;
 	private int myExerAmt;
 	private int myRank;
+	private String myName;
 }
