@@ -25,6 +25,8 @@ public interface ExerciseRepository extends JpaRepository<ExerciseHistory, Long>
 	@Query(value= "select eh from ExerciseHistory eh where  DATE_FORMAT(date, '%Y-%m-%d') = :yesterday"
 			+ " order by exerAmt desc")
 	List<ExerciseHistory> selectYesterRank(@Param("yesterday") String yesterday);
+	
+	Long deleteByUserGoalId(int userGoalId);
 
 //	@Query(value = "select id, max(date) as date, exerAmt, total, userGoalId, userId from ExerciseHistory eh where eh.userId = :userId and userGoalId= :userGoalId")
 //	ExerciseHistory findMaxDateByUserId(@Param("userId")int userId, @Param("userGoalId")int userGoalId);

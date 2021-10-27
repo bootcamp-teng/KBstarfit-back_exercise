@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -282,5 +283,11 @@ public class ExerciseDomain {
 		allRankList.setRankList(rankList);
 		
 		return new ResponseEntity<Optional<AllRankList>> (Optional.ofNullable(allRankList), HttpStatus.OK);
+	}
+
+	@Transactional
+	public ResponseEntity<String> deleteExer(int userGoalId) throws Exception {
+		Long deletedRecords = exerciseRepo.deleteByUserGoalId(userGoalId);
+		return new ResponseEntity<String> ("deleted items : "+deletedRecords, HttpStatus.OK);
 	}
 }

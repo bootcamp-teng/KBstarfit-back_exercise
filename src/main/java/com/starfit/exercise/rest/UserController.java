@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +49,14 @@ public class UserController {
 			) throws Exception {
 			return exerService.insertExer(exer);
 	}
+	
+	@DeleteMapping("/v1/exercise/{userGoalId}")
+	@ApiOperation(value="운동 삭제하기")
+	public ResponseEntity<String> deleteUser(
+			@PathVariable(name="userGoalId", required = true) int userGoalId
+			) throws Exception {
+			return exerService.deleteExer(userGoalId);
+	}	
 	
 	@PutMapping("/v1/exercise")
 	@ApiOperation(value="운동 정보 수정하기")
