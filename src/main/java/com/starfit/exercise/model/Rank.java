@@ -8,4 +8,5 @@ public class Rank {
 	private ExerciseHistory exerHist;
 	private int rank;
 	private String name;
+	private int characterId;
 }

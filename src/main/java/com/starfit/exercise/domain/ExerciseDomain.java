@@ -270,12 +270,16 @@ public class ExerciseDomain {
 				= list.stream()
 					.filter(t->(int) t.get("id")==exer.getUserId()) // 유저테이블 -> 유저 아이디 -> 유저 이름 불러옴
 					.collect(Collectors.toList());
-			if (!username.isEmpty()) currRank.setName((String) username.get(0).get("name"));
+			if (!username.isEmpty()) {
+				currRank.setName((String) username.get(0).get("name"));
+				currRank.setCharacterId((int) username.get(0).get("characterId"));
+			}
 			currRank.setExerHist(exer);
 			if (userId==exer.getUserId()) {
 				allRankList.setMyRank(rank);
 				allRankList.setMyExerAmt(exer.getExerAmt());
 				allRankList.setMyName((String) username.get(0).get("name"));
+				allRankList.setMyCharacterId((int) username.get(0).get("characterId"));
 			}
 			rankList.add(currRank);
 			currRank.setRank(rank++);

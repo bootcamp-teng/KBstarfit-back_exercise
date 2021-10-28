@@ -11,4 +11,5 @@ public class AllRankList {
 	private int myExerAmt;
 	private int myRank;
 	private String myName;
+	private int myCharacterId;
 }
