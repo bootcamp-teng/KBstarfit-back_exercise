@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -238,7 +239,7 @@ public class ExerciseDomain {
 		List<ExerciseHistory> exerlist = null;
 		try {
 			log.info("Start db select");
-			exerlist = exerciseRepo.findByUserGoalId(usergoalid);
+			exerlist = exerciseRepo.findByUserGoalId(usergoalid, Sort.by(Sort.Order.asc("date"),Sort.Order.asc("id")));
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

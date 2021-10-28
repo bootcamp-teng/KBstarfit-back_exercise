@@ -1,8 +1,8 @@
 package com.starfit.exercise.data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +16,7 @@ public interface ExerciseRepository extends JpaRepository<ExerciseHistory, Long>
 	
 	List<ExerciseHistory> findByUserIdAndUserGoalId(int userId, int userGoalId);
 	
-	List<ExerciseHistory> findByUserGoalId(int userGoalId);
+	List<ExerciseHistory> findByUserGoalId(int userGoalId, Sort sort);
 	
 	@Query(value= "select eh from ExerciseHistory eh where eh.userId = :userId"
 	+ " and date = (select max(date) from ExerciseHistory where userGoalId= :userGoalId)")
